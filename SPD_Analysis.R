@@ -389,15 +389,6 @@ ggsave('Plots/loudness.pdf', width = w, height = h, dpi=dpi)
 
 
 
-# script checked to here
-
-
-
-
-
-
-
-
 # K-means to identify clusters  ----
 
 
@@ -426,7 +417,8 @@ for (i in 1:17) {
 }
 
 
-
+# Plotting the elbow
+# Note, this may differ dependent on your system
 plot(1:17,
      wcss,
      type = 'b',
@@ -434,6 +426,7 @@ plot(1:17,
      xlab = 'Number of clusters',
      ylab = 'WCSS')
 
+# Uncomment if you want to write result again
 #write(wcss, file='Data/kMeansresults')
 
 # Fitting K-Means to the dataset
@@ -457,7 +450,7 @@ data.unique <- read.csv('Data/dataUniqueWithClusters.csv')
 
 # Descriptive stats per K-means ----
 
-descriptiveClusters <- describeBy(data.unique[c(6:14)], data.unique$clusterID, IQR=TRUE, fast=FALSE)
+descriptiveClusters <- describeBy(data.unique[c(7:15)], data.unique$clusterID, IQR=TRUE, fast=FALSE)
 # Uncomment if you want to write the data again
 #write.csv(descriptive[1], 'Data/c1Descriptive.csv')
 #write.csv(descriptive[2], 'Data/c2Descriptive.csv')
@@ -518,14 +511,10 @@ data$TrackIDmatch <- NULL
 # Uncomment if you want to write the file again.
 #write.csv(data, 'dataWithTrackIDmatch.csv')
 
-# Read the data in
+# Read the data in again
 data <- read.csv('Data/dataWithTrackIDmatch.csv')
 
-# Look at popularity of tracks within clusters
-
-# Getting the 20 values of each cluster
-
-
+# Having a look at popular tracks within clusters
 
 cluster1pop <- subset(data$TrackID, data$clusterID==1)
 pop1df <- head(summary(as.factor(cluster1pop)),50)
@@ -575,42 +564,5 @@ pop7df <- as.data.frame(pop7df)
 pop7df <- cbind(TrackID = rownames(pop7df), pop7df)
 rownames(pop7df) <- 1:nrow(pop7df)
 top20.c7 <- head(pop7df,20)
-
-
-# Checked to here now
-
-# Look at the distribution of cluster-songs per playlist.
-
-
-# Here, change cluster 7 to be cluster 2.
-
-
-proData <- subset(data, select=c(playlistID, clusterID))
-proData$playlistID <- as.factor(proData$playlistID)
-proData$clusterID <- as.factor(proData$clusterID)
-
-proData.table <- prop.table(table(proData), margin=1)
-
-highestPropHolder <- vector()
-
-for (n in 1:dim(proData.table)[1]){
-  thisRow <- proData.table[n,]
-  highestPropHolder[n] <- max(thisRow)
-}
-
-# Check links with playlist data
-# Doesn't look like there's any links here.
-playlistData <- subset(data, select=c(playlistID, label, userCat, demoCat, nFoll, nTracks))
-dupPlayIndex <- duplicated(playlistData[,c('playlistID')])
-playlistData <- playlistData[!dupPlayIndex,]
-
-playlistData$diversity <- highestPropHolder
-
-boxplot(diversity ~ as.factor(label), data=playlistData)
-
-
-
-
-
 
 
