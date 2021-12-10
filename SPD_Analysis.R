@@ -24,7 +24,7 @@ current_path = rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path ))
 
 # Read data
-data <- read.csv('Data/Sleep_FullDataset_withDuplicates.csv')
+data <- read.csv('Data/SPD_withDuplicates.csv')
 
 # Fix some typos
 data$demoCat[data$demoCat == 'baby'] = 'Baby'
@@ -33,6 +33,7 @@ data$userCat[data$userCat == ''] = 'NA'
 
 # Set data types
 data$X <- NULL
+data$X.1 <- NULL
 data$label <- as.factor(data$label)
 data$userCat <- as.factor(data$userCat)
 data$demoCat <- as.factor(data$demoCat)
@@ -78,7 +79,7 @@ data.unique$category <- 'Sleep'
 data.unique$duration <- round(data.unique$duration_ms*0.001)
 
 # This adds a weight to the LDA since the Sleep Playlist Dataset is smaller than the MSSD
-data.unique$weight <- 28.44
+data.unique$weight <- 28.48
 
 mergedData <- rbind(subset(data.unique, select=c(weight, category, acousticness, danceability,
                                            energy, instrumentalness, tempo,
@@ -227,8 +228,8 @@ tUVSS.speechiness.p <- data.UserVsSpotify %>%
 
 descriptive <- describeBy(mergedData[c(3:12)], mergedData$category, IQR=TRUE, fast=FALSE)
 # Uncomment if you want to save the files
-write.csv(descriptive[1], 'Data/generalDescriptive.csv')
-write.csv(descriptive[2], 'Data/sleepDescriptive.csv')
+write.csv(descriptive[2], 'Data/generalDescriptive.csv')
+write.csv(descriptive[1], 'Data/sleepDescriptive.csv')
 
 # Linear Discriminant Analysis (LDA) ----
 
@@ -393,8 +394,8 @@ ggsave('Plots/loudness.pdf', width = w, height = h, dpi=dpi)
 
 
 # Subset data
-dataForClustering <- data.unique[,c(7,8,9,10,11,12,13,14,15)]
-infoForClustering <- data.unique[,c(2,21)]
+dataForClustering <- data.unique[,c(6,7,8,9,10,11,12,13,14)]
+infoForClustering <- data.unique[,c(2,20)]
 
 
 # Feature scaling
@@ -427,7 +428,7 @@ plot(1:17,
      ylab = 'WCSS')
 
 # Uncomment if you want to write result again
-#write(wcss, file='Data/kMeansresults')
+write(wcss, file='Data/kMeansresults')
 
 # Fitting K-Means to the dataset
 kmeans = kmeans(x = dFC.s, centers = 7, iter.max=1000)
@@ -435,14 +436,14 @@ kmeans.labels = kmeans$cluster
 
 #uncomment this section if you want to repeat the calculations
 #
-#write(kmeans$centers, file='Data/kMeansCenters')
+write(kmeans$centers, file='Data/kMeansCenters')
 #loaded.kmeansCenters <- load('kmeansCenters')
 #
-#data.unique$clusterID <- kmeans.labels
-#data.unique$clusterID <- as.factor(data.unique$clusterID)
+data.unique$clusterID <- kmeans.labels
+data.unique$clusterID <- as.factor(data.unique$clusterID)
 #
 # Save data.unique, so that we have all the data.
-#write.csv(data.unique, 'dataUniqueWithClusters.csv')
+write.csv(data.unique, 'SPD_unique_withClusters.csv')
 
 
 # Read the clustered data
@@ -450,15 +451,15 @@ data.unique <- read.csv('Data/dataUniqueWithClusters.csv')
 
 # Descriptive stats per K-means ----
 
-descriptiveClusters <- describeBy(data.unique[c(7:15)], data.unique$clusterID, IQR=TRUE, fast=FALSE)
+descriptiveClusters <- describeBy(data.unique[c(6:14)], data.unique$clusterID, IQR=TRUE, fast=FALSE)
 # Uncomment if you want to write the data again
-#write.csv(descriptive[1], 'Data/c1Descriptive.csv')
-#write.csv(descriptive[2], 'Data/c2Descriptive.csv')
-#write.csv(descriptive[3], 'Data/c3Descriptive.csv')
-#write.csv(descriptive[4], 'Data/c4Descriptive.csv')
-#write.csv(descriptive[5], 'Data/c5Descriptive.csv')
-#write.csv(descriptive[6], 'Data/c6Descriptive.csv')
-#write.csv(descriptive[7], 'Data/c7Descriptive.csv')
+write.csv(descriptive[1], 'Data/c1Descriptive.csv')
+write.csv(descriptive[2], 'Data/c2Descriptive.csv')
+write.csv(descriptive[3], 'Data/c3Descriptive.csv')
+write.csv(descriptive[4], 'Data/c4Descriptive.csv')
+write.csv(descriptive[5], 'Data/c5Descriptive.csv')
+write.csv(descriptive[6], 'Data/c6Descriptive.csv')
+write.csv(descriptive[7], 'Data/c7Descriptive.csv')
 
 # Now make a table with median values per cluster
 mC1 <- descriptiveClusters[1]$'1'
@@ -492,7 +493,7 @@ rownames(medianDF) <- c('danceability', 'energy', 'loudness', 'speechiness', 'ac
 
 
 # Uncomment if you want to write the file again
-#write.csv(t(medianDF), 'Data/ClustersMedian.csv')
+write.csv(t(medianDF), 'Data/ClustersMedian.csv')
 
 
 
@@ -508,11 +509,15 @@ data$TrackIDmatch <- as.character(data$TrackID)
 data['clusterID'] <- keyMap$clusterID[match(data$TrackIDmatch, keyMap$TrackID)]
 data$TrackIDmatch <- NULL
 
+
+summary(as.factor(data$clusterID))
+
+
 # Uncomment if you want to write the file again.
-#write.csv(data, 'dataWithTrackIDmatch.csv')
+write.csv(data, 'SPD_withClusters.csv')
 
 # Read the data in again
-data <- read.csv('Data/dataWithTrackIDmatch.csv')
+data <- read.csv('Data/SPD_withClusters.csv')
 
 # Having a look at popular tracks within clusters
 
