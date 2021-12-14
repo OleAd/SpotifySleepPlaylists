@@ -570,4 +570,88 @@ pop7df <- cbind(TrackID = rownames(pop7df), pop7df)
 rownames(pop7df) <- 1:nrow(pop7df)
 top20.c7 <- head(pop7df,20)
 
+# looks like it's now 6 and 4 that needs to be collapsed
+
+
+data$clusterID[data$clusterID == 6] <- 4
+data$clusterID <- as.factor(data$clusterID)
+
+# Now redo the descriptive stats, to get data to plot
+
+descClust_six <- describeBy(data[c(6:14)], data$clusterID, IQR=TRUE, fast=FALSE)
+# Uncomment if you want to write the data again
+#write.csv(descriptive[1], 'Data/c1Descriptive.csv')
+#write.csv(descriptive[2], 'Data/c2Descriptive.csv')
+#write.csv(descriptive[3], 'Data/c3Descriptive.csv')
+#write.csv(descriptive[4], 'Data/c4Descriptive.csv')
+#write.csv(descriptive[5], 'Data/c5Descriptive.csv')
+#write.csv(descriptive[6], 'Data/c6Descriptive.csv')
+#write.csv(descriptive[7], 'Data/c7Descriptive.csv')
+
+# Now make a table with median values per cluster, then calculate relative
+mC1_six <- descClust_six[1]$'1'
+mC1_six <- t(t(mC1_six$median))
+mC2_six <- descClust_six[2]$'2'
+mC2_six <- t(t(mC2_six$median))
+mC3_six <- descClust_six[3]$'3'
+mC3_six <- t(t(mC3_six$median))
+mC4_six <- descClust_six[4]$'4'
+mC4_six <- t(t(mC4_six$median))
+mC5_six <- descClust_six[5]$'5'
+mC5_six <- t(t(mC5_six$median))
+mC6_six <- descClust_six[6]$'7'
+mC6_six <- t(t(mC6_six$median))
+
+# Put into a dataframe
+medianDF_six <- data.frame(mC1_six)
+medianDF_six$cluster2 <- mC2_six
+medianDF_six$cluster3 <- mC3_six
+medianDF_six$cluster4 <- mC4_six
+medianDF_six$cluster5 <- mC5_six
+medianDF_six$cluster6 <- mC6_six
+
+colnames(medianDF_six) <- c('Cluster1', 'Cluster2','Cluster3', 'Cluster4','Cluster5', 'Cluster6')
+rownames(medianDF_six) <- c('danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness',
+                            'liveness', 'valence', 'tempo')
+
+# get the median for all data
+
+allData_desc = describe(data[c(6:14)], IQR=TRUE, fast=FALSE)
+
+diffAgainstMedian = as.data.frame(medianDF_six - allData_desc$median)
+diffAgainstMedian['variable'] <- rownames(diffAgainstMedian)
+rownames(diffAgainstMedian) <- 1:nrow(diffAgainstMedian)
+# now for plots
+
+#melt
+
+clusterDiff <- melt(diffAgainstMedian, id.vars=c('variable'))
+colnames(clusterDiff) <- c('variable', 'cluster', 'value')
+
+
+
+# make two separate one due to differences in scale
+top <- ggplot(subset(clusterDiff, !variable %in% c('tempo', 'loudness')), aes(x=variable, y=value)) + 
+  geom_col() + 
+  geom_hline(yintercept=0) +
+  coord_cartesian(ylim = c(-1, 1)) +
+  #scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  coord_flip() + 
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  facet_grid(~ cluster)
+ggsave('Plots/top.pdf', width = 10, height = 3, dpi=300)
+
+# make two separate one due to differences in scale
+bottom <- ggplot(subset(clusterDiff, variable %in% c('tempo', 'loudness')), aes(x=variable, y=value)) + 
+  geom_col() + 
+  geom_hline(yintercept=0) +
+  coord_cartesian(ylim = c(-26, 26)) +
+  #scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
+  coord_flip() + 
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  facet_grid(~ cluster)
+ggsave('Plots/bottom.pdf', width = 10, height = 1.25, dpi=300)
+
 
