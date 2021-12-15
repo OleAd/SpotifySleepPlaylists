@@ -443,7 +443,7 @@ data.unique$clusterID <- kmeans.labels
 data.unique$clusterID <- as.factor(data.unique$clusterID)
 #
 # Save data.unique, so that we have all the data.
-write.csv(data.unique, 'SPD_unique_withClusters.csv')
+write.csv(data.unique, 'Data/SPD_unique_withClusters.csv')
 
 
 # Read the clustered data
@@ -514,7 +514,7 @@ summary(as.factor(data$clusterID))
 
 
 # Uncomment if you want to write the file again.
-write.csv(data, 'SPD_withClusters.csv')
+write.csv(data, 'Data/SPD_withClusters.csv')
 
 # Read the data in again
 data <- read.csv('Data/SPD_withClusters.csv')

@@ -15,7 +15,7 @@ import numpy as np
 
 #%% Load some data
 
-data = pd.read_csv('Data/Sleep_FullDataset_withDuplicates.csv', encoding='UTF-8', na_values='')
+data = pd.read_csv('Data/SPD_withClusters.csv', encoding='UTF-8', na_values='')
 allGenres = data['Genres']
 
 largeGenres = ['electronic',
