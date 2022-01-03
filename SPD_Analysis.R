@@ -447,7 +447,7 @@ write.csv(data.unique, 'Data/SPD_unique_withClusters.csv')
 
 
 # Read the clustered data
-data.unique <- read.csv('Data/dataUniqueWithClusters.csv')
+data.unique <- read.csv('Data/SPD_unique_withClusters.csv')
 
 # Descriptive stats per K-means ----
 
@@ -570,15 +570,18 @@ pop7df <- cbind(TrackID = rownames(pop7df), pop7df)
 rownames(pop7df) <- 1:nrow(pop7df)
 top20.c7 <- head(pop7df,20)
 
+
 # looks like it's now 6 and 4 that needs to be collapsed
 
 
 data$clusterID[data$clusterID == 6] <- 4
 data$clusterID <- as.factor(data$clusterID)
 
-# Now redo the descriptive stats, to get data to plot
 
-descClust_six <- describeBy(data[c(6:14)], data$clusterID, IQR=TRUE, fast=FALSE)
+# Now redo the descriptive stats, to get data to plot
+# Doing this on the entire dataset to get a view of how clusters size up within the dataset
+
+descClust_six <- describeBy(data[c(7:15)], data$clusterID, IQR=TRUE, fast=FALSE)
 # Uncomment if you want to write the data again
 #write.csv(descriptive[1], 'Data/c1Descriptive.csv')
 #write.csv(descriptive[2], 'Data/c2Descriptive.csv')
@@ -634,9 +637,8 @@ colnames(clusterDiff) <- c('variable', 'cluster', 'value')
 top <- ggplot(subset(clusterDiff, !variable %in% c('tempo', 'loudness')), aes(x=variable, y=value)) + 
   geom_col() + 
   geom_hline(yintercept=0) +
-  coord_cartesian(ylim = c(-1, 1)) +
   #scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
-  coord_flip() + 
+  coord_flip(ylim = c(-1, 1)) + 
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   facet_grid(~ cluster)
@@ -646,12 +648,44 @@ ggsave('Plots/top.pdf', width = 10, height = 3, dpi=300)
 bottom <- ggplot(subset(clusterDiff, variable %in% c('tempo', 'loudness')), aes(x=variable, y=value)) + 
   geom_col() + 
   geom_hline(yintercept=0) +
-  coord_cartesian(ylim = c(-26, 26)) +
   #scale_y_continuous(breaks = scales::pretty_breaks(n = 5)) +
-  coord_flip() + 
+  coord_flip(ylim=c(-30,30)) + 
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  facet_grid(~ cluster)
+  facet_grid(~ cluster, scales = "fixed")
 ggsave('Plots/bottom.pdf', width = 10, height = 1.25, dpi=300)
 
+library(patchwork)
 
+top / bottom
+
+
+
+
+
+
+# Now look at the reduced genres
+
+genreData <- read.csv('Data/SPD_withClusters_and_reducedGenre.csv')
+genreData$X <- NULL
+genreData$Unnamed..0 <- NULL
+
+genreData$reducedGenre <- as.factor(genreData$reducedGenre)
+
+genre.c1 <- subset(genreData$reducedGenre, genreData$clusterID == 1)
+sort(summary(genre.c1), decreasing=TRUE)
+
+genre.c2 <- subset(genreData$reducedGenre, genreData$clusterID == 2)
+sort(summary(genre.c2), decreasing=TRUE)
+
+genre.c3 <- subset(genreData$reducedGenre, genreData$clusterID == 3)
+sort(summary(genre.c3), decreasing=TRUE)
+
+genre.c4 <- subset(genreData$reducedGenre, genreData$clusterID == 4)
+sort(summary(genre.c4), decreasing=TRUE)
+
+genre.c5 <- subset(genreData$reducedGenre, genreData$clusterID == 5)
+sort(summary(genre.c5), decreasing=TRUE)
+
+genre.c6 <- subset(genreData$reducedGenre, genreData$clusterID == 7)
+sort(summary(genre.c6), decreasing=TRUE)
