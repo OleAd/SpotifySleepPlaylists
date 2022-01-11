@@ -21,10 +21,12 @@ current_path = rstudioapi::getActiveDocumentContext()$path
 setwd(dirname(current_path ))
 
 # Read data
-data <- read.csv('Data/dataWithTrackIDmatch.csv')
+data <- read.csv('Data/SPD_withClusters_and_reducedGenre.csv')
+data$X <- NULL
+data$Unnamed..0 <- NULL
 
-# Merge cluster 7 with cluster 2
-data$clusterID[data$clusterID == 7] <- 2
+# Merge cluster 6 with cluster 4
+data$clusterID[data$clusterID == 6] <- 4
 
 # prune dataset to include only what we're interested in
 
@@ -89,4 +91,61 @@ withinPlaylist <- ggplot(pCompSorted.melted,aes(x=variable, y=value, fill=variab
   theme(text = element_text(size=12))
 withinPlaylist
 
-ggsave('Plots/withinPlaylistClusterDistribution.pdf', width = w, height = h, dpi=dpi)
+ggsave('Plots/withinPlaylistClusterDistribution.png', width = w, height = h, dpi=dpi)
+
+
+
+
+
+
+
+# Calculate the specific distribution of clusters in spotify/user playlists
+
+# calculate the distribution of clusters in the playlists
+
+
+propDataAll <- subset(pCompData, select=c(playlistID, clusterID))
+propDataAll$clusterID <- as.factor(propDataAll$clusterID)
+propDataAll <- prop.table(table(propDataAll), margin=1)
+
+propDataAllDF <- as.data.frame.array(propDataAll)
+propDataAllDF <- cbind(playlistID = rownames(propDataAllDF), propDataAllDF)
+rownames(propDataAllDF) <- 1:nrow(propDataAllDF)
+colnames(propDataAllDF) <- c('playlistID', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6')
+
+
+# add in userCat
+
+
+propDataAllComp <- merge(propDataAllDF, pCompData.unique, by='playlistID')
+
+library(ggpubr)
+
+propDataAllComp <- subset(propDataAllComp, userCat!='')
+
+propDataAll.UvsS <- subset(propDataAllComp, select = c(C1, C2, C3, C4, C5, C6, userCat))
+
+describeBy(subset(propDataAllComp, select=c('C1','C2', 'C3', 'C4', 'C5', 'C6', 'userCat')) , group='userCat')
+
+
+# make plot
+
+propDataAll.UvsS.melted = melt(propDataAll.UvsS, by=usercat)
+
+
+
+
+UvsS <- ggplot(propDataAll.UvsS.melted,aes(x=variable, y=value, fill=userCat))+
+  geom_boxplot(notch=FALSE) +
+  #geom_flat_violin(position = position_nudge(x = 0, y = 0)) +
+  ylab('')+xlab('')+
+  theme_cowplot()+guides(fill = FALSE)+
+  scale_colour_brewer(palette = "Dark2")+
+  scale_fill_brewer(palette = "Dark2")+
+  ggtitle('Comparison of clusters in user vs Spotify playlists') +
+  theme(text = element_text(size=12))
+UvsS
+
+
+ggsave('PlotsForPublication/Comparison of clusters in user vs Spotify playlists.pdf', width = w, height = h, dpi=dpi)
+ggsave('PlotsForPublication/Comparison of clusters in user vs Spotify playlists.png', width = w, height = h, dpi=dpi)

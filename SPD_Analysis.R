@@ -669,6 +669,7 @@ top / bottom
 genreData <- read.csv('Data/SPD_withClusters_and_reducedGenre.csv')
 genreData$X <- NULL
 genreData$Unnamed..0 <- NULL
+genreData$clusterID[genreData$clusterID == 6] <- 4
 
 genreData$reducedGenre <- as.factor(genreData$reducedGenre)
 
@@ -689,3 +690,9 @@ sort(summary(genre.c5), decreasing=TRUE)
 
 genre.c6 <- subset(genreData$reducedGenre, genreData$clusterID == 7)
 sort(summary(genre.c6), decreasing=TRUE)
+
+
+# top tracks per cluster
+
+c1 <- subet(genreData
+
